@@ -1,2 +1,1 @@
-int var;
-var = foo + 1;
+int var;var = foo+1;
