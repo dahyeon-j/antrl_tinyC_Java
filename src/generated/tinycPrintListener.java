@@ -8,8 +8,15 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.List;
 
+/**
+ * int var; var = foo+1;
+ * int a = 1+2;
+ */
+
 public class tinycPrintListener extends tinycBaseListener {
-    ParseTreeProperty<String> newText = new ParseTreeProperty<String>(); // 스트링 관리
+    ParseTreeProperty<String> newTexts = new ParseTreeProperty<String>(); // 스트링 관리
+    SymbolTable symbleTable = new SymbolTable();
+
 
     /**
      * {@inheritDoc}
@@ -17,14 +24,14 @@ public class tinycPrintListener extends tinycBaseListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override public void enterProgram(tinycParser.ProgramContext ctx) {
-        System.out.println(ctx.getChild(0).getChild(0).getText()); // int가 나옴
     }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitProgram(tinycParser.ProgramContext ctx) {}
+    @Override public void exitProgram(tinycParser.ProgramContext ctx) {
+    }
     /**
      * {@inheritDoc}
      *
@@ -48,7 +55,9 @@ public class tinycPrintListener extends tinycBaseListener {
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitParen_expr(tinycParser.Paren_exprContext ctx) { }
+    @Override public void exitParen_expr(tinycParser.Paren_exprContext ctx) {
+        newTexts.put(ctx, "( " + newTexts.get(ctx.getChild(1)) + " )");
+    }
     /**
      * {@inheritDoc}
      *
@@ -60,7 +69,18 @@ public class tinycPrintListener extends tinycBaseListener {
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitExpr(tinycParser.ExprContext ctx) { }
+    @Override public void exitExpr(tinycParser.ExprContext ctx) {
+        String value = "";
+        for(int i = 0; i < ctx.getChildCount(); i++) {
+            if(newTexts.get(ctx.getChild(i)) != null) value += newTexts.get(ctx.getChild(i));
+            else {
+                value += " " + ctx.getChild(i).getText() + " ";
+                symbleTable.addSymbol(ctx.getChild(i).getText()); // if assignment
+            }
+        }
+
+        newTexts.put(ctx, value);
+    }
     /**
      * {@inheritDoc}
      *
@@ -72,7 +92,14 @@ public class tinycPrintListener extends tinycBaseListener {
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitTest(tinycParser.TestContext ctx) { }
+    @Override public void exitTest(tinycParser.TestContext ctx) {
+        String value = "";
+        for(int i = 0; i < ctx.getChildCount(); i++) {
+            if(newTexts.get(ctx.getChild(i)) != null) value += newTexts.get(ctx.getChild(i));
+            else value += " " + ctx.getChild(i).getText() + " ";
+        }
+        newTexts.put(ctx, value);
+    }
     /**
      * {@inheritDoc}
      *
@@ -84,7 +111,14 @@ public class tinycPrintListener extends tinycBaseListener {
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitSum(tinycParser.SumContext ctx) { }
+    @Override public void exitSum(tinycParser.SumContext ctx) {
+        String value = "";
+        for(int i = 0; i < ctx.getChildCount(); i++) {
+            if(newTexts.get(ctx.getChild(i)) != null) value += newTexts.get(ctx.getChild(i));
+            else value += " " + ctx.getChild(i).getText() + " ";
+        }
+        newTexts.put(ctx, value);
+    }
     /**
      * {@inheritDoc}
      *
@@ -100,33 +134,41 @@ public class tinycPrintListener extends tinycBaseListener {
         // 논 터미널의 경우 자식을 다시 찾아가면서 어떤 텍스트인지 찾음
         // getText: 자식이 id 나 integer이 나오면
         // 논 터미널일 경우 getChild 해서 트리로 달아놓음
+        newTexts.put(ctx, newTexts.get(ctx.getChild(0)));
     }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void enterId(tinycParser.IdContext ctx) { }
+    @Override public void enterId(tinycParser.IdContext ctx) {
+    }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation does nothing.</p>
      */
     @Override public void exitId(tinycParser.IdContext ctx) {
-        // getText 
+        newTexts.put(ctx, ctx.getText());
     }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void enterInteger(tinycParser.IntegerContext ctx) { }
+    @Override public void enterInteger(tinycParser.IntegerContext ctx) {
+        /**
+         * return integer
+         */
+    }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitInteger(tinycParser.IntegerContext ctx) { }
+    @Override public void exitInteger(tinycParser.IntegerContext ctx) {
+        newTexts.put(ctx, ctx.getText());
+    }
 
     /**
      * {@inheritDoc}
@@ -145,8 +187,7 @@ public class tinycPrintListener extends tinycBaseListener {
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void visitTerminal(TerminalNode node) {
-    }
+    @Override public void visitTerminal(TerminalNode node) { }
     /**
      * {@inheritDoc}
      *
