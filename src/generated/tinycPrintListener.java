@@ -43,7 +43,23 @@ public class tinycPrintListener extends tinycBaseListener {
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitStatement(tinycParser.StatementContext ctx) { }
+    @Override public void exitStatement(tinycParser.StatementContext ctx) {
+        String value = "";
+
+//        for(int i = 0; i < ctx.getChildCount(); i++) {
+//            if(newTexts.get(ctx.getChild(i)) != null) value += newTexts.get(ctx.getChild(i));
+//            else {
+//                value += " " + ctx.getChild(i).getText() + " ";
+//                symbleTable.addSymbol(ctx.getChild(i).getText()); // if assignment
+//            }
+//        }
+        String text = ctx.getChild(0).getText();
+        switch (text) {
+
+        }
+
+        newTexts.put(ctx, value);
+    }
     /**
      * {@inheritDoc}
      *
@@ -75,6 +91,7 @@ public class tinycPrintListener extends tinycBaseListener {
             if(newTexts.get(ctx.getChild(i)) != null) value += newTexts.get(ctx.getChild(i));
             else {
                 value += " " + ctx.getChild(i).getText() + " ";
+                System.out.println(ctx.getChild(0).getText()); // print l-value
                 symbleTable.addSymbol(ctx.getChild(i).getText()); // if assignment
             }
         }
