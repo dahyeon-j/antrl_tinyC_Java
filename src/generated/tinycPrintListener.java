@@ -16,7 +16,7 @@ import java.util.List;
 public class tinycPrintListener extends tinycBaseListener {
     ParseTreeProperty<String> newTexts = new ParseTreeProperty<String>(); // 스트링 관리
     SymbolTable symbleTable = new SymbolTable();
-
+    String indent_size = "    ";
 
     /**
      * {@inheritDoc}
@@ -31,6 +31,10 @@ public class tinycPrintListener extends tinycBaseListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override public void exitProgram(tinycParser.ProgramContext ctx) {
+        // 여기서 tab 추가
+        for(int i = 0; i < ctx.getChildCount(); i++) {
+            System.out.println(newTexts.get(ctx.getChild(i)));
+        }
     }
     /**
      * {@inheritDoc}
@@ -44,7 +48,7 @@ public class tinycPrintListener extends tinycBaseListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override public void exitStatement(tinycParser.StatementContext ctx) {
-        String value = "";
+        String text = "";
 
 //        for(int i = 0; i < ctx.getChildCount(); i++) {
 //            if(newTexts.get(ctx.getChild(i)) != null) value += newTexts.get(ctx.getChild(i));
@@ -53,12 +57,32 @@ public class tinycPrintListener extends tinycBaseListener {
 //                symbleTable.addSymbol(ctx.getChild(i).getText()); // if assignment
 //            }
 //        }
-        String text = ctx.getChild(0).getText();
-        switch (text) {
+        String first_child = ctx.getChild(0).getText();
+
+
+        if(first_child.equals(';')) {
+            text = ";\n";
+        }
+        else if(first_child.equals("if")) {
+            if(ctx.getChildCount() == 3) {
+                text ="if" + newTexts.get(ctx.getChild(1)) + "\n" + newTexts.get(ctx.getChild(2));
+            } else {
+
+            }
+        }
+        else if(first_child.equals("while")) {
 
         }
+        else if(first_child.equals("do")) {
 
-        newTexts.put(ctx, value);
+        }
+        else if(first_child.equals("{")) {
+
+        }
+        else {
+            text = newTexts.get(ctx.getChild(0)) + ";";
+        }
+        newTexts.put(ctx, text);
     }
     /**
      * {@inheritDoc}
@@ -72,7 +96,7 @@ public class tinycPrintListener extends tinycBaseListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override public void exitParen_expr(tinycParser.Paren_exprContext ctx) {
-        newTexts.put(ctx, "( " + newTexts.get(ctx.getChild(1)) + " )");
+        newTexts.put(ctx, " (" + newTexts.get(ctx.getChild(1)) + ")");
     }
     /**
      * {@inheritDoc}
@@ -86,17 +110,15 @@ public class tinycPrintListener extends tinycBaseListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override public void exitExpr(tinycParser.ExprContext ctx) {
-        String value = "";
-        for(int i = 0; i < ctx.getChildCount(); i++) {
-            if(newTexts.get(ctx.getChild(i)) != null) value += newTexts.get(ctx.getChild(i));
-            else {
-                value += " " + ctx.getChild(i).getText() + " ";
-                System.out.println(ctx.getChild(0).getText()); // print l-value
-                symbleTable.addSymbol(ctx.getChild(i).getText()); // if assignment
-            }
+        String text = "";
+        if (ctx.getChildCount() == 1) {
+            text = newTexts.get(ctx.getChild(0))
+        }
+        else {
+            newTexts
         }
 
-        newTexts.put(ctx, value);
+        newTexts.put(ctx, text);
     }
     /**
      * {@inheritDoc}
@@ -110,12 +132,16 @@ public class tinycPrintListener extends tinycBaseListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override public void exitTest(tinycParser.TestContext ctx) {
-        String value = "";
-        for(int i = 0; i < ctx.getChildCount(); i++) {
-            if(newTexts.get(ctx.getChild(i)) != null) value += newTexts.get(ctx.getChild(i));
-            else value += " " + ctx.getChild(i).getText() + " ";
+        String text = "";
+        if(ctx.getChildCount() == 1) {
+            for(int i = 0; i < ctx.getChildCount(); i++) {
+                if(newTexts.get(ctx.getChild(i)) != null) text += newTexts.get(ctx.getChild(i));
+                else text += " " + ctx.getChild(i).getText() + " ";
+            }
+        } else {
+            text = newTexts.get(ctx.getChild(0)) + " < " + newTexts.get(ctx.getChild(2));
         }
-        newTexts.put(ctx, value);
+        newTexts.put(ctx, text);
     }
     /**
      * {@inheritDoc}
