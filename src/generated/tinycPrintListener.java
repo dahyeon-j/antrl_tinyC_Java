@@ -31,12 +31,26 @@ public class tinycPrintListener extends tinycBaseListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override public void exitProgram(tinycParser.ProgramContext ctx) {
-        int tab = 0;
+        int cnt_tabs
+                = 0;
         String text = "";
         // 여기서 tab 추가
         // 완전 공백인 것도 제거!
         for(int i = 0; i < ctx.getChildCount(); i++) {
-            System.out.println(newTexts.get(ctx.getChild(i)));
+            text += newTexts.get(ctx.getChild(i));
+        }
+        String[] lines = text.split("\n");
+        for(String line: lines) {
+            if(line.length() == 0) continue;
+            // the number of tabs
+            String tabs = new String(new char[cnt_tabs]).replace("\0", indent_size);
+            if(line.equals("{")) {
+                System.out.println("{");
+                cnt_tabs++;
+            } else if(line.equals("}")) {
+                cnt_tabs--;
+                System.out.println(cnt_tabs * 4);
+            }
         }
     }
     /**
