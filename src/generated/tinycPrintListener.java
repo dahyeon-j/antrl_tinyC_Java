@@ -16,7 +16,7 @@ import java.util.List;
 public class tinycPrintListener extends tinycBaseListener {
     ParseTreeProperty<String> newTexts = new ParseTreeProperty<String>(); // 스트링 관리
     SymbolTable symbleTable = new SymbolTable();
-    String indent_size = "    ";
+    String indent_size = "    "; // the number of space
 
     /**
      * {@inheritDoc}
@@ -31,7 +31,10 @@ public class tinycPrintListener extends tinycBaseListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override public void exitProgram(tinycParser.ProgramContext ctx) {
+        int tab = 0;
+        String text = "";
         // 여기서 tab 추가
+        // 완전 공백인 것도 제거!
         for(int i = 0; i < ctx.getChildCount(); i++) {
             System.out.println(newTexts.get(ctx.getChild(i)));
         }
@@ -49,38 +52,28 @@ public class tinycPrintListener extends tinycBaseListener {
      */
     @Override public void exitStatement(tinycParser.StatementContext ctx) {
         String text = "";
-
-//        for(int i = 0; i < ctx.getChildCount(); i++) {
-//            if(newTexts.get(ctx.getChild(i)) != null) value += newTexts.get(ctx.getChild(i));
-//            else {
-//                value += " " + ctx.getChild(i).getText() + " ";
-//                symbleTable.addSymbol(ctx.getChild(i).getText()); // if assignment
-//            }
-//        }
         String first_child = ctx.getChild(0).getText();
-
 
         if(first_child.equals(';')) {
             text = ";\n";
         }
         else if(first_child.equals("if")) {
-            if(ctx.getChildCount() == 3) {
-                text ="if" + newTexts.get(ctx.getChild(1)) + "\n" + newTexts.get(ctx.getChild(2));
-            } else {
-
+            text ="if " + newTexts.get(ctx.getChild(1)) + newTexts.get(ctx.getChild(2));
+            if(ctx.getChildCount() == 5) {
+                text += ("else" + newTexts.get(ctx.getChild(1)));
             }
         }
         else if(first_child.equals("while")) {
-
+            text = "while" + newTexts.get(ctx.getChild(1)) + newTexts.get(ctx.getChild(2));
         }
         else if(first_child.equals("do")) {
-
+            text = "do" + newTexts.get(ctx.getChild(1)) + "while" + newTexts.get(ctx.getChild(3)) + ";";
         }
         else if(first_child.equals("{")) {
-
+            text = "\n{\n" + newTexts.get(ctx.getChild(1)) +"}\n";
         }
         else {
-            text = newTexts.get(ctx.getChild(0)) + ";";
+            text = newTexts.get(ctx.getChild(0)) + ";\n";
         }
         newTexts.put(ctx, text);
     }
@@ -96,7 +89,7 @@ public class tinycPrintListener extends tinycBaseListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override public void exitParen_expr(tinycParser.Paren_exprContext ctx) {
-        newTexts.put(ctx, " (" + newTexts.get(ctx.getChild(1)) + ")");
+        newTexts.put(ctx, "(" + newTexts.get(ctx.getChild(1)) + ")");
     }
     /**
      * {@inheritDoc}
@@ -111,11 +104,12 @@ public class tinycPrintListener extends tinycBaseListener {
      */
     @Override public void exitExpr(tinycParser.ExprContext ctx) {
         String text = "";
-        if (ctx.getChildCount() == 1) {
-            text = newTexts.get(ctx.getChild(0))
+        if(ctx.getChildCount() == 1) {
+            text = newTexts.get(ctx.getChild(0));
         }
         else {
-            newTexts
+            // 대입 연산자
+            text = newTexts.get(ctx.getChild(0)) + " = " + newTexts.get(ctx.getChild(2));
         }
 
         newTexts.put(ctx, text);
